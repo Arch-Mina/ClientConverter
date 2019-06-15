@@ -176,9 +176,9 @@ namespace SpiderClientConverter
 
                 Signature = 0x4A10;
                 ObjectCount = (ushort)appearances.Object[appearances.Object.Count - 1].Id;
-                OutfitCount = (ushort)appearances.Outfit.Count;
-                EffectCount = (ushort)appearances.Effect.Count;
-                MissileCount = (ushort)appearances.Missile.Count;
+                OutfitCount = (ushort)appearances.Outfit[appearances.Outfit.Count - 1].Id;
+                EffectCount = (ushort)appearances.Effect[appearances.Effect.Count - 1].Id;
+                MissileCount = (ushort)appearances.Missile[appearances.Missile.Count - 1].Id;
 
                 Console.WriteLine("ObjectCount: {0}", ObjectCount);
                 Console.WriteLine("OutfitCount: {0}", OutfitCount);
@@ -208,15 +208,48 @@ namespace SpiderClientConverter
                             w.Write(buffer);
                         }
                     }
-                    foreach (Appearance outfit in appearances.Outfit)
-                        WriteAppearance1000(w, outfit, 2);
-
-                    foreach (Appearance effect in appearances.Effect)
-                        WriteAppearance1000(w, effect, 3);
-
-                    foreach (Appearance missile in appearances.Missile)
-                        WriteAppearance1000(w, missile, 4);
-
+					CurrentId = 0;
+                    for (int i = 0; i < appearances.Outfit[appearances.Outfit.Count-1].Id; i++)
+                    {
+                        if (appearances.Outfit[CurrentId] != null && i == appearances.Outfit[CurrentId].Id)
+                        {
+                            WriteAppearance1000(w, appearances.Outfit[CurrentId], 2);
+                            CurrentId++;
+                        }
+                        else
+                        {
+                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+                            w.Write(buffer);
+                        }
+                    }	
+					CurrentId = 0;
+                    for (int i = 0; i < appearances.Effect[appearances.Effect.Count-1].Id; i++)
+                    {
+                        if (appearances.Effect[CurrentId] != null && i == appearances.Effect[CurrentId].Id)
+                        {
+                            WriteAppearance1000(w, appearances.Effect[CurrentId], 3);
+                            CurrentId++;
+                        }
+                        else
+                        {
+                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+                            w.Write(buffer);
+                        }
+                    }	
+					CurrentId = 0;
+                    for (int i = 0; i < appearances.Missile[appearances.Missile.Count-1].Id; i++)
+                    {
+                        if (appearances.Missile[CurrentId] != null && i == appearances.Missile[CurrentId].Id)
+                        {
+                            WriteAppearance1000(w, appearances.Missile[CurrentId], 4);
+                            CurrentId++;
+                        }
+                        else
+                        {
+                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+                            w.Write(buffer);
+                        }
+                    }
                     datFile.Close();
                 }
             }
@@ -341,48 +374,7 @@ namespace SpiderClientConverter
                 
             }
         }
-        /*
-        public string getSprName(int Id, int tileId, int spriteType)
-        {
-            string sprName = "";
-            int row = Convert.ToInt16(Math.Ceiling((double)(tileId / 12))) + 1;
-            int column = tileId - ((row - 1) * 12) + 1;
 
-            if (spriteType == 1)
-            {
-                int sprID = Id + column - 1 + ((Int16)Math.Floor((double)((row - 1) / 2)) * 12);
-                sprName = sprID.ToString();
-                if (row % 2 == 1)
-                    sprName += "_1";
-                else
-                    sprName += "_2";
-            }
-            else if (spriteType == 2)
-            {
-                int sprID = Id + (Int16)Math.Floor((double)((column - 1) / 2)) + ((Int16)Math.Floor((double)(row - 1)) * 6);
-                sprName = sprID.ToString();
-                if (column % 2 == 1)
-                    sprName += "_1";
-                else
-                    sprName += "_2";
-            }
-            else if (spriteType == 3)
-            {
-                int sprID = Id + (Int16)Math.Floor((double)((column - 1) / 2)) + ((Int16)Math.Floor((double)((row - 1) / 2)) * 6);
-                sprName = sprID.ToString();
-                if (column % 2 == 0 && row % 2 == 0)
-                    sprName = sprName + "_4";
-                else if (column % 2 != 0 && row % 2 == 0)
-                    sprName = sprName + "_3";
-                else if (column % 2 == 0 && row % 2 != 0)
-                    sprName = sprName + "_2";
-                else if (column % 2 != 0 && row % 2 != 0)
-                    sprName = sprName + "_1";
-            }
-
-            return sprName;
-        }
-        */
         public ImageList GenerateTileSetImageList(Image tileSetImage, Size tileSize, Point offset, Size space, int spriteType)
         {
             try
