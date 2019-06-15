@@ -1,0 +1,18 @@
+# Scripts
+release/
+debug/
+packages/
+
+# Visual studio intermediate directories
+bin/
+obj/
+*.suo
+*.csproj.user
+
+# StyleCop
+stylecop.*
+*cache
+*.lock
+*.ide
+*.ide-shm
+*.ide-wal
