@@ -209,7 +209,7 @@ namespace SpiderClientConverter
                         }
                     }
 					CurrentId = 0;
-                    for (int i = 0; i < appearances.Outfit[appearances.Outfit.Count-1].Id; i++)
+                    for (int i = 1; i <= appearances.Outfit[appearances.Outfit.Count-1].Id; i++)
                     {
                         if (appearances.Outfit[CurrentId] != null && i == appearances.Outfit[CurrentId].Id)
                         {
@@ -223,7 +223,7 @@ namespace SpiderClientConverter
                         }
                     }	
 					CurrentId = 0;
-                    for (int i = 0; i < appearances.Effect[appearances.Effect.Count-1].Id; i++)
+                    for (int i = 1; i <= appearances.Effect[appearances.Effect.Count-1].Id; i++)
                     {
                         if (appearances.Effect[CurrentId] != null && i == appearances.Effect[CurrentId].Id)
                         {
@@ -237,7 +237,7 @@ namespace SpiderClientConverter
                         }
                     }	
 					CurrentId = 0;
-                    for (int i = 0; i < appearances.Missile[appearances.Missile.Count-1].Id; i++)
+                    for (int i = 1; i <= appearances.Missile[appearances.Missile.Count-1].Id; i++)
                     {
                         if (appearances.Missile[CurrentId] != null && i == appearances.Missile[CurrentId].Id)
                         {
