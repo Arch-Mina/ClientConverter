@@ -381,7 +381,7 @@ namespace SpiderClientConverter
             {
                 ImageList Tiles = new ImageList();
                 Tiles.ImageSize = tileSize;
-
+                Tiles.ColorDepth = ColorDepth.Depth32Bit;
                 float width = default(float), height = default(float);
                 width = tileSetImage.PhysicalDimension.Width;
                 height = tileSetImage.PhysicalDimension.Height;
@@ -415,7 +415,8 @@ namespace SpiderClientConverter
                                 {
                                     ImageList ArrangeTiles = new ImageList();
                                     ArrangeTiles.ImageSize = tileSize;
-
+                                    ArrangeTiles.ColorDepth = ColorDepth.Depth32Bit;
+                                    ArrangeTiles.TransparentColor = Color.Transparent;
                                     for (int a = 0; a <= 1; a++)
                                     {
                                         tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
@@ -434,7 +435,6 @@ namespace SpiderClientConverter
                                     }
                                     for (int k = 1; k >= 0; k--)
                                         Tiles.Images.Add(Convert.ToString(Tiles.Images.Count), ArrangeTiles.Images[k]);
-
                                 }
 
                             }
@@ -447,7 +447,8 @@ namespace SpiderClientConverter
                                 {
                                     ImageList ArrangeTiles = new ImageList();
                                     ArrangeTiles.ImageSize = tileSize;
-
+                                    ArrangeTiles.ColorDepth = ColorDepth.Depth32Bit;
+                                    ArrangeTiles.TransparentColor = Color.Transparent;
                                     for (int a = 0; a <= 1; a++)
                                     {
                                         tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
@@ -477,7 +478,8 @@ namespace SpiderClientConverter
                                 {
                                     ImageList ArrangeTiles = new ImageList();
                                     ArrangeTiles.ImageSize = tileSize;
-
+                                    ArrangeTiles.ColorDepth = ColorDepth.Depth32Bit;
+                                    ArrangeTiles.TransparentColor = Color.Transparent;
                                     for (int a = 0; a <= 1; a++)
                                     {
                                         for (int b = 0; b <= 1; b++)
