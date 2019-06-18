@@ -9,6 +9,7 @@ using System.IO;
 using Newtonsoft.Json;
 using OpenTibia.Client.Sprites;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace SpiderClientConverter
 {
@@ -38,7 +39,7 @@ namespace SpiderClientConverter
         public ushort EffectCount { get; set; }
         public ushort MissileCount { get; set; }
         public List<int> SpritesOffset { get; set; }
-
+        public ConcurrentDictionary<int, Sprite[]> concurrentDictionary = new ConcurrentDictionary<int, Sprite[]>();
         public SpiderClientConverter()
         {
             InitializeComponent();
@@ -132,20 +133,16 @@ namespace SpiderClientConverter
             {
                 MaxDegreeOfParallelism = Environment.ProcessorCount * 5
             };
-            if (ToSpr.Checked || SliceBox.Checked)
-                options = new ParallelOptions()
-                {
-                    MaxDegreeOfParallelism = 1
-                };
-
+                
             if (ToSpr.Checked)
             {
                 Features = OpenTibia.Client.ClientFeatures.Extended;
                 sprites = SpriteStorage.Create(version, Features);
             }
+
             progress = 0;
             Directory.CreateDirectory(_dumpToPath + @"//slices//");
-            Parallel.ForEach(catalog, options, sheet =>
+            Parallel.ForEach(catalog, options, (sheet, state) =>
             {
                 progress++;
                 if (sheet.Type == "sprite")
@@ -155,9 +152,16 @@ namespace SpiderClientConverter
                 }
                 worker.ReportProgress((int)(progress * 100 / catalog.Count));
             });
+
             if (ToSpr.Checked)
+            {
+                foreach (var tile in concurrentDictionary.OrderBy(tile => tile.Key))
+                {
+                    sprites.AddSprites(tile.Value);
+                }
+
                 sprites.Save(String.Format("{0}//Clients//Tibia.spr", _dumpToPath), version);
-                
+            }
         }
 
         public void LoadAppearances()
@@ -285,37 +289,11 @@ namespace SpiderClientConverter
             spriteBuffer.Position = 0;
             Image image = Image.FromStream(spriteBuffer);
             image.Save(String.Format("{0}Sprites {1}-{2}-{3}.png", _dumpToPath, sheet.FirstSpriteid.ToString(), sheet.LastSpriteid.ToString(), sheet.SpriteType.ToString()), ImageFormat.Png);
-
+            
             if (ToSpr.Checked || SliceBox.Checked)
             {
                 Size tileSize = new Size(32, 32);
-                Point Offset = new Point(0, 0);
-                Size Space = new Size(0, 0);
-                ImageList imglist = new ImageList();
-                imglist = GenerateTileSetImageList(image, tileSize, Offset, Space, sheet.SpriteType);
-                imglist.ColorDepth = ColorDepth.Depth32Bit;
-                imglist.ImageSize = new Size(32, 32);
-                int loopTo = sheet.LastSpriteid - sheet.FirstSpriteid;
-                if (sheet.SpriteType == 3)
-                    loopTo = (loopTo * 4) + 4;
-                else if (sheet.SpriteType >= 1)
-                    loopTo = (loopTo * 2) + 2;
-                else
-                    loopTo += 1;
-                for (int i = 0; i < loopTo; i++)
-                {
-                    if (ToSpr.Checked)
-                        sprites.AddSprite((Bitmap)imglist.Images[i]);
-
-                    if (SliceBox.Checked)
-                    {
-                        if (sheet.SpriteType == 0)
-                            imglist.Images[i].Save(_dumpToPath + @"//slices//" + (sheet.FirstSpriteid + i).ToString() + ".png");
-                        else
-                            imglist.Images[i].Save(_dumpToPath + @"//slices//" + GetSprName(sheet.FirstSpriteid, i, sheet.SpriteType) + ".png");
-                    }
-                    imglist.Images[i].Dispose();
-                }
+                GenerateTileSetImageList(image, tileSize, sheet);
             }
         }
 
@@ -323,6 +301,8 @@ namespace SpiderClientConverter
         {
             string sprName = "";
             if (spriteType <= 2)
+                sprName = (Id + tileId).ToString();
+            else if (spriteType <= 2)
             {
                 double sprID = Id + Math.Floor((double)tileId / 2);
                 sprName = sprID.ToString();
@@ -375,146 +355,151 @@ namespace SpiderClientConverter
             }
         }
 
-        public ImageList GenerateTileSetImageList(Image tileSetImage, Size tileSize, Point offset, Size space, int spriteType)
+        public void GenerateTileSetImageList(Image tileSetImage, Size tileSize, Catalog sheet)
         {
             try
             {
-                ImageList Tiles = new ImageList();
-                Tiles.ImageSize = tileSize;
-                Tiles.ColorDepth = ColorDepth.Depth32Bit;
-                float width = default(float), height = default(float);
-                width = tileSetImage.PhysicalDimension.Width;
-                height = tileSetImage.PhysicalDimension.Height;
+                int tileCount = sheet.LastSpriteid - sheet.FirstSpriteid;
+                if (sheet.SpriteType == 3)
+                    tileCount = (tileCount * 4) + 4;
+                else if (sheet.SpriteType >= 1)
+                    tileCount = (tileCount * 2) + 2;
+                else
+                    tileCount += 1;
 
-                if ((tileSize.Width > 0) & (tileSize.Height > 0))
+                Sprite[] Tiles = new Sprite[tileCount];
+                int sprCount = 0;
+
+                Image tile = default(Image);
+                int xCounter = 0, yCounter = 0;
+                if (sheet.SpriteType == 0)
                 {
-                    if ((width >= (float)tileSize.Width) & (height >= (float)tileSize.Height))
+                    for (int x = 0; x <= 11; x++)
                     {
-                        Image tile = default(Image);
-                        int xCounter = 0, yCounter = 0;
-                        if (spriteType == 0)
+                        for (int y = 0; y <= 11; y++)
                         {
-                            for (int x = 0; x <= 11; x++)
-                            {
-                                for (int y = 0; y <= 11; y++)
-                                {
-                                    tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
-                                    Graphics g = Graphics.FromImage(tile);
-                                    Rectangle sourceRect = new Rectangle(y * tileSize.Width, x * tileSize.Height, tileSize.Width, tileSize.Height);
-                                    g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
-                                    Tiles.Images.Add(Convert.ToString(Tiles.Images.Count), tile);
-                                    g.Dispose();
-                                }
-                            }
-                        }
-                        else if (spriteType == 1)
-                        {
-                            for (int x = 0; x <= 5; x++)
-                            {
-                                for (int y = 0; y <= 11; y++)
-                                {
-                                    ImageList ArrangeTiles = new ImageList();
-                                    ArrangeTiles.ImageSize = tileSize;
-                                    ArrangeTiles.ColorDepth = ColorDepth.Depth32Bit;
-                                    ArrangeTiles.TransparentColor = Color.Transparent;
-                                    for (int a = 0; a <= 1; a++)
-                                    {
-                                        tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
-                                        Graphics g = Graphics.FromImage(tile);
-                                        Rectangle sourceRect = new Rectangle(y * tileSize.Width, (x + yCounter + a) * tileSize.Height, tileSize.Width, tileSize.Height);
-                                        g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
-                                        ArrangeTiles.Images.Add(Convert.ToString(ArrangeTiles.Images.Count), tile);
-                                        g.Dispose();
-                                    }
-                                    if (xCounter < 11)
-                                        xCounter = xCounter + 1;
-                                    else
-                                    {
-                                        xCounter = 0;
-                                        yCounter = yCounter + 1;
-                                    }
-                                    for (int k = 1; k >= 0; k--)
-                                        Tiles.Images.Add(Convert.ToString(Tiles.Images.Count), ArrangeTiles.Images[k]);
-                                }
+                            if (sprCount >= tileCount)
+                                break;
 
-                            }
-                        }
-                        else if (spriteType == 2)
-                        {
-                            for (int x = 0; x <= 11; x++)
-                            {
-                                for (int y = 0; y <= 5; y++)
-                                {
-                                    ImageList ArrangeTiles = new ImageList();
-                                    ArrangeTiles.ImageSize = tileSize;
-                                    ArrangeTiles.ColorDepth = ColorDepth.Depth32Bit;
-                                    ArrangeTiles.TransparentColor = Color.Transparent;
-                                    for (int a = 0; a <= 1; a++)
-                                    {
-                                        tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
-                                        Graphics g = Graphics.FromImage(tile);
-                                        Rectangle sourceRect = new Rectangle(xCounter * tileSize.Width, x * tileSize.Height, tileSize.Width, tileSize.Height);
-                                        g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
-                                        ArrangeTiles.Images.Add(Convert.ToString(ArrangeTiles.Images.Count), tile);
-                                        g.Dispose();
-
-                                        if (xCounter < 11)
-                                            xCounter = xCounter + 1;
-                                        else
-                                            xCounter = 0;
-                                    }
-                                    yCounter = yCounter + 1;
-                                    for (int k = 1; k >= 0; k--)
-                                        Tiles.Images.Add(Convert.ToString(Tiles.Images.Count), ArrangeTiles.Images[k]);
-                                }
-
-                            }
-                        }
-                        else if (spriteType == 3)
-                        {
-                            for (int x = 0; x <= 5; x++)
-                            {
-                                for (int y = 0; y <= 5; y++)
-                                {
-                                    ImageList ArrangeTiles = new ImageList();
-                                    ArrangeTiles.ImageSize = tileSize;
-                                    ArrangeTiles.ColorDepth = ColorDepth.Depth32Bit;
-                                    ArrangeTiles.TransparentColor = Color.Transparent;
-                                    for (int a = 0; a <= 1; a++)
-                                    {
-                                        for (int b = 0; b <= 1; b++)
-                                        {
-                                            tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
-                                            Graphics g = Graphics.FromImage(tile);
-                                            Rectangle sourceRect = new Rectangle((y + b + xCounter) * tileSize.Width, (x + a + yCounter) * tileSize.Height, tileSize.Width, tileSize.Height);
-                                            g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
-                                            ArrangeTiles.Images.Add(Convert.ToString(ArrangeTiles.Images.Count), tile);
-                                            g.Dispose();
-                                        }
-                                    }
-                                    if (xCounter < 5)
-                                        xCounter = xCounter + 1;
-                                    else
-                                    {
-                                        xCounter = 0;
-                                        yCounter = yCounter + 1;
-                                    }
-                                    for (int k = 3; k >= 0; k--)
-                                        Tiles.Images.Add(Convert.ToString(Tiles.Images.Count), ArrangeTiles.Images[k]);
-                                }
-                            }
+                            tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
+                            Graphics g = Graphics.FromImage(tile);
+                            Rectangle sourceRect = new Rectangle(y * tileSize.Width, x * tileSize.Height, tileSize.Width, tileSize.Height);
+                            g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
+                            Sprite item = new Sprite();
+                            item.SetBitmap((Bitmap)tile);
+                            Tiles[sprCount] = item;
+                            if (SliceBox.Checked)
+                                    tile.Save(_dumpToPath + @"//slices//" + GetSprName(sheet.FirstSpriteid, sprCount, sheet.SpriteType) + ".png");
+                            g.Dispose();
+                            tile.Dispose();
+                            sprCount++;
                         }
                     }
                 }
+                else if (sheet.SpriteType == 1)
+                {
+                    for (int x = 0; x <= 5; x++)
+                    {
+                        for (int y = 0; y <= 11; y++)
+                        {
+                            for (int a = 1; a >= 0; a--)
+                            {
+                                if (sprCount >= tileCount)
+                                    break;
+                                tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
+                                Graphics g = Graphics.FromImage(tile);
+                                Rectangle sourceRect = new Rectangle(y * tileSize.Width, (x + (x * xCounter) + a) * tileSize.Height, tileSize.Width, tileSize.Height);
+                                g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
+                                Sprite item = new Sprite();
+                                item.SetBitmap((Bitmap)tile);
+                                Tiles[sprCount] = item;
+                                if (SliceBox.Checked)
+                                        tile.Save(_dumpToPath + @"//slices//" + GetSprName(sheet.FirstSpriteid, sprCount, sheet.SpriteType) + ".png");
+                                g.Dispose();
+                                tile.Dispose();
+                                sprCount++;
+                            }
+                        }
+                        xCounter = xCounter + 1;
+                    }
+                }
+                else if (sheet.SpriteType == 2)
+                {
+                    for (int x = 0; x <= 11; x++)
+                    {
+                        for (int y = 0; y <= 5; y++)
+                        {
+                            for (int a = 1; a >= 0; a--)
+                            {
+                                if (sprCount >= tileCount)
+                                    break;
 
-                return Tiles;
+                                tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
+                                Graphics g = Graphics.FromImage(tile);
+                                Rectangle sourceRect = new Rectangle((y + xCounter + a) * tileSize.Height, x * tileSize.Width, tileSize.Width, tileSize.Height);
+                                g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
+                                Sprite item = new Sprite();
+                                item.SetBitmap((Bitmap)tile);
+                                Tiles[sprCount] = item;
+                                if (SliceBox.Checked)
+                                        tile.Save(_dumpToPath + @"//slices//" + GetSprName(sheet.FirstSpriteid, sprCount, sheet.SpriteType) + ".png");
+                                
+                                g.Dispose();
+                                tile.Dispose();
+                                sprCount++;
+                            }
+                            xCounter = xCounter + 1;
+                            
+                        }
+                        xCounter = 0;
+                    }
+                }
+                else if (sheet.SpriteType == 3)
+                {
+                    for (int x = 0; x <= 5; x++)
+                    {
+                        for (int y = 0; y <= 5; y++)
+                        {
+                            for (int a = 1; a >= 0; a--)
+                            {
+                                for (int b = 1; b >= 0; b--)
+                                {
+                                    if (sprCount >= tileCount)
+                                        break;
+
+                                    tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
+                                    Graphics g = Graphics.FromImage(tile);
+                                    Rectangle sourceRect = new Rectangle((y + b + xCounter) * tileSize.Width, (x + a + yCounter) * tileSize.Height, tileSize.Width, tileSize.Height);
+                                    g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
+                                    Sprite item = new Sprite();
+                                    item.SetBitmap((Bitmap)tile);
+                                    Tiles[sprCount] = item;
+                                    if (SliceBox.Checked)
+                                            tile.Save(_dumpToPath + @"//slices//" + GetSprName(sheet.FirstSpriteid, sprCount, sheet.SpriteType) + ".png");
+                                    g.Dispose();
+                                    tile.Dispose();
+                                    sprCount++;
+                                }
+                            }
+                                    
+                            if (xCounter < 5)
+                                xCounter = xCounter + 1;
+                            else
+                            {
+                                xCounter = 0;
+                                yCounter = yCounter + 1;
+                            }                                    
+                        }
+                    }
+                }
+                concurrentDictionary.TryAdd(sheet.FirstSpriteid, Tiles);
+                tileSetImage.Dispose();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
 
-            return null;
         }
 
         public void WriteAppearance1000(BinaryWriter w, Appearance item, int type)
