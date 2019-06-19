@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/ylc5e9voadjgcemv?svg=true)](https://ci.appveyor.com/project/Arch-Mina/clientconverter "Download builds for Windows")
+===============
 # ClientConverter
  Features:
 
