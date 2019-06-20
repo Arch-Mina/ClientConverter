@@ -28,12 +28,13 @@ namespace SpiderClientConverter
         public List<Catalog> catalog;
         private static string _assetsPath = "";
         private static string _dumpToPath = "";
-        public OpenTibia.Core.Version version = new OpenTibia.Core.Version(1000, "Client 10.00", 0x4A10, 0x59E48E02, 0);
+        public OpenTibia.Core.Version version;
         public OpenTibia.Client.ClientFeatures Features;
         public SpriteStorage sprites;
         public int progress;
 
-        public uint Signature { get; set; }
+        public uint DatSignature { get; set; }
+        public uint SprSignature { get; set; }
         public ushort ObjectCount { get; set; }
         public ushort OutfitCount { get; set; }
         public ushort EffectCount { get; set; }
@@ -47,6 +48,8 @@ namespace SpiderClientConverter
             worker.ProgressChanged += Worker_ProgressChanged;
             worker.DoWork += Worker_DoWork;
             worker.RunWorkerCompleted += Worker_Completed;
+            DatSignature = 0x4A10;
+            SprSignature = 0x59E48E02;
         }
 
         private void Worker_Completed(object sender, RunWorkerCompletedEventArgs e)
@@ -136,6 +139,7 @@ namespace SpiderClientConverter
                 
             if (ToSpr.Checked)
             {
+                version = new OpenTibia.Core.Version(1000, "Client 10.00", DatSignature, SprSignature, 0);
                 Features = OpenTibia.Client.ClientFeatures.Extended;
                 sprites = SpriteStorage.Create(version, Features);
             }
@@ -146,10 +150,8 @@ namespace SpiderClientConverter
             {
                 progress++;
                 if (sheet.Type == "sprite")
-                {
-                    Console.WriteLine("{0}", sheet.File);
                     DumpSpriteSheet(sheet);
-                }
+
                 worker.ReportProgress((int)(progress * 100 / catalog.Count));
             });
 
@@ -178,7 +180,6 @@ namespace SpiderClientConverter
             {
                 Appearances appearances = Appearances.Parser.ParseFrom(stream);
 
-                Signature = 0x4A10;
                 ObjectCount = (ushort)appearances.Object[appearances.Object.Count - 1].Id;
                 OutfitCount = (ushort)appearances.Outfit[appearances.Outfit.Count - 1].Id;
                 EffectCount = (ushort)appearances.Effect[appearances.Effect.Count - 1].Id;
@@ -193,7 +194,7 @@ namespace SpiderClientConverter
                 var datFile = new FileStream(datExportPath + "Tibia.dat", FileMode.Create, FileAccess.Write);
                 using (var w = new BinaryWriter(datFile))
                 {
-                    w.Write(Signature);
+                    w.Write(DatSignature);
                     w.Write(ObjectCount);
                     w.Write(OutfitCount);
                     w.Write(EffectCount);
@@ -288,7 +289,8 @@ namespace SpiderClientConverter
 
             spriteBuffer.Position = 0;
             Image image = Image.FromStream(spriteBuffer);
-            image.Save(String.Format("{0}Sprites {1}-{2}-{3}.png", _dumpToPath, sheet.FirstSpriteid.ToString(), sheet.LastSpriteid.ToString(), sheet.SpriteType.ToString()), ImageFormat.Png);
+            if(ExSheets.Checked)
+                image.Save(String.Format("{0}Sprites {1}-{2}-{3}.png", _dumpToPath, sheet.FirstSpriteid.ToString(), sheet.LastSpriteid.ToString(), sheet.SpriteType.ToString()), ImageFormat.Png);
             
             if (ToSpr.Checked || SliceBox.Checked)
             {
@@ -398,6 +400,7 @@ namespace SpiderClientConverter
                 }
                 else if (sheet.SpriteType == 1)
                 {
+                    
                     for (int x = 0; x <= 5; x++)
                     {
                         for (int y = 0; y <= 11; y++)
@@ -408,7 +411,7 @@ namespace SpiderClientConverter
                                     break;
                                 tile = new Bitmap(tileSize.Width, tileSize.Height, tileSetImage.PixelFormat);
                                 Graphics g = Graphics.FromImage(tile);
-                                Rectangle sourceRect = new Rectangle(y * tileSize.Width, (x + (x * xCounter) + a) * tileSize.Height, tileSize.Width, tileSize.Height);
+                                Rectangle sourceRect = new Rectangle(y * tileSize.Width, (x +  xCounter + a) * tileSize.Height, tileSize.Width, tileSize.Height);
                                 g.DrawImage(tileSetImage, new Rectangle(0, 0, tileSize.Width, tileSize.Height), sourceRect, GraphicsUnit.Pixel);
                                 Sprite item = new Sprite();
                                 item.SetBitmap((Bitmap)tile);
@@ -764,8 +767,27 @@ namespace SpiderClientConverter
 
         }
 
+        private void CustomSiganture_CheckedChanged(object sender, EventArgs e)
+        {
+            sigPanel.Visible = CustomSiganture.Checked;
+            if (CustomSiganture.Checked == false)
+            {
+                DatSignature = 0x4A10;
+                SprSignature = 0x59E48E02;
+            }
+            datHex.Value = DatSignature;
+            sprHex.Value = SprSignature;
+        }
 
+        private void DatHex_ValueChanged(object sender, EventArgs e)
+        {
+            DatSignature = (uint)datHex.Value;
+        }
 
+        private void SprHex_ValueChanged(object sender, EventArgs e)
+        {
+            SprSignature = (uint)sprHex.Value;
+        }
     }
 }
 
