@@ -136,7 +136,7 @@ namespace SpiderClientConverter
             {
                 MaxDegreeOfParallelism = Environment.ProcessorCount * 5
             };
-                
+
             if (ToSpr.Checked)
             {
                 version = new OpenTibia.Core.Version(1000, "Client 10.00", DatSignature, SprSignature, 0);
@@ -200,7 +200,7 @@ namespace SpiderClientConverter
                     w.Write(EffectCount);
                     w.Write(MissileCount);
                     int CurrentId = 0;
-                    for (int i = 0; i <= appearances.Object[appearances.Object.Count-1].Id-100; i++)
+                    for (int i = 0; i <= appearances.Object[appearances.Object.Count - 1].Id - 100; i++)
                     {
                         if (i + 100 == appearances.Object[CurrentId].Id)
                         {
@@ -209,12 +209,12 @@ namespace SpiderClientConverter
                         }
                         else
                         {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
                             w.Write(buffer);
                         }
                     }
-					CurrentId = 0;
-                    for (int i = 1; i <= appearances.Outfit[appearances.Outfit.Count-1].Id; i++)
+                    CurrentId = 0;
+                    for (int i = 1; i <= appearances.Outfit[appearances.Outfit.Count - 1].Id; i++)
                     {
                         if (appearances.Outfit[CurrentId] != null && i == appearances.Outfit[CurrentId].Id)
                         {
@@ -223,12 +223,12 @@ namespace SpiderClientConverter
                         }
                         else
                         {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
                             w.Write(buffer);
                         }
-                    }	
-					CurrentId = 0;
-                    for (int i = 1; i <= appearances.Effect[appearances.Effect.Count-1].Id; i++)
+                    }
+                    CurrentId = 0;
+                    for (int i = 1; i <= appearances.Effect[appearances.Effect.Count - 1].Id; i++)
                     {
                         if (appearances.Effect[CurrentId] != null && i == appearances.Effect[CurrentId].Id)
                         {
@@ -237,12 +237,12 @@ namespace SpiderClientConverter
                         }
                         else
                         {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
                             w.Write(buffer);
                         }
-                    }	
-					CurrentId = 0;
-                    for (int i = 1; i <= appearances.Missile[appearances.Missile.Count-1].Id; i++)
+                    }
+                    CurrentId = 0;
+                    for (int i = 1; i <= appearances.Missile[appearances.Missile.Count - 1].Id; i++)
                     {
                         if (appearances.Missile[CurrentId] != null && i == appearances.Missile[CurrentId].Id)
                         {
@@ -251,7 +251,7 @@ namespace SpiderClientConverter
                         }
                         else
                         {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00};
+                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
                             w.Write(buffer);
                         }
                     }
@@ -289,9 +289,9 @@ namespace SpiderClientConverter
 
             spriteBuffer.Position = 0;
             Image image = Image.FromStream(spriteBuffer);
-            if(ExSheets.Checked)
+            if (ExSheets.Checked)
                 image.Save(String.Format("{0}Sprites {1}-{2}-{3}.png", _dumpToPath, sheet.FirstSpriteid.ToString(), sheet.LastSpriteid.ToString(), sheet.SpriteType.ToString()), ImageFormat.Png);
-            
+
             if (ToSpr.Checked || SliceBox.Checked)
             {
                 Size tileSize = new Size(32, 32);
@@ -319,8 +319,8 @@ namespace SpiderClientConverter
                 double sprID = Id + Math.Floor((double)tileId / 4);
                 sprName = sprID.ToString();
 
-                sprID = (tileId/4.0) - Math.Truncate((double)tileId / 4.0);
-                if(sprID == 0.0)
+                sprID = (tileId / 4.0) - Math.Truncate((double)tileId / 4.0);
+                if (sprID == 0.0)
                     sprName += "_1";
                 else if (sprID == 0.25)
                     sprName += "_2";
@@ -351,10 +351,21 @@ namespace SpiderClientConverter
                         else if (sheet.SpriteType == 3)
                             counter += 4;
                         worker.ReportProgress((int)(progress * 100 / (ObjectCount + OutfitCount + EffectCount + MissileCount + catalog.Count)));
-                    }                        
+                    }
                 }
-                
+
             }
+        }
+
+        public int GetSheetType(uint sprId)
+        {
+            foreach (Catalog sheet in catalog)
+            {
+                if (sheet.FirstSpriteid <= sprId && sheet.LastSpriteid >= sprId)
+                    return sheet.SpriteType;
+            }
+
+            return 0;
         }
 
         public void GenerateTileSetImageList(Image tileSetImage, Size tileSize, Catalog sheet)
@@ -405,7 +416,7 @@ namespace SpiderClientConverter
                     {
                         for (int y = 0; y <= 11; y++)
                         {
-                            for (int a = 1; a >= 0; a--)
+                            for (int a = 0; a <= 1; a++)
                             {
                                 if (sprCount >= tileCount)
                                     break;
@@ -432,7 +443,7 @@ namespace SpiderClientConverter
                     {
                         for (int y = 0; y <= 5; y++)
                         {
-                            for (int a = 1; a >= 0; a--)
+                            for (int a = 0; a <= 1; a++)
                             {
                                 if (sprCount >= tileCount)
                                     break;
@@ -463,9 +474,9 @@ namespace SpiderClientConverter
                     {
                         for (int y = 0; y <= 5; y++)
                         {
-                            for (int a = 1; a >= 0; a--)
+                            for (int a = 0; a <= 1; a++)
                             {
-                                for (int b = 1; b >= 0; b--)
+                                for (int b = 0; b <= 1; b++)
                                 {
                                     if (sprCount >= tileCount)
                                         break;
@@ -747,18 +758,34 @@ namespace SpiderClientConverter
                 {
                     for (int j = 0; j < NumSprites/2; j++)
                     {
-                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
-                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
+                        if (GetSheetType(item.FrameGroup[i].SpriteInfo.SpriteId[j]) == 3)
+                        {
+                            if (Width == 2 && Height == 1)
+                            {
+                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
+                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
+                            }
+                            else
+                            {
+                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 2));
+                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
+                            }
+                        }
+                        else
+                        {
+                            w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
+                            w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
+                        }
                     }
                 }
                 else if (sliceType == 4)
                 {
                     for (int j = 0; j < NumSprites/4; j++)
                     {
-                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
-                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
-                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 2));
                         w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 3));
+                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 2));
+                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
+                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
                     }
                 }
 
