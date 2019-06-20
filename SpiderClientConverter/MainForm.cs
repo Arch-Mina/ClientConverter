@@ -704,9 +704,26 @@ namespace SpiderClientConverter
                 if (type == 2)
                     w.Write((byte)item.FrameGroup[i].FixedFrameGroup);
 
+                uint Width = 1;
+                uint Height = 1;
+                int sliceType = GetSheetType(item.FrameGroup[i].SpriteInfo.SpriteId[0]);
 
-                uint Width = (uint)((item.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].X + item.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].Width) > 32 ? 2 : 1);
-                uint Height = (uint)((item.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].Y + item.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].Height) > 32 ? 2 : 1);
+                if (sliceType == 1)
+                {
+                    Width = 1;
+                    Height = 2;
+                }
+                else if (sliceType == 2)
+                {
+                    Width = 2;
+                    Height = 1;
+                }
+                else if (sliceType == 3)
+                {
+                    Width = 2;
+                    Height = 2;
+                }
+
 
                 w.Write((byte)Width);
                 w.Write((byte)Height);
@@ -746,39 +763,22 @@ namespace SpiderClientConverter
                 if (item.FrameGroup[i].SpriteInfo.Animation != null)
                     NumSprites = NumSprites * (uint)item.FrameGroup[i].SpriteInfo.Animation.SpritePhase.Count;
 
-                uint sliceType = NumSprites / (uint)item.FrameGroup[i].SpriteInfo.SpriteId.Count;
-                if (sliceType == 1)
+                if (sliceType == 0)
                 {
                     for (int j = 0; j < NumSprites; j++)
                     {
                         w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
                     }
                 }
-                else if (sliceType == 2)
+                else if (sliceType == 1 ||sliceType == 2)
                 {
                     for (int j = 0; j < NumSprites/2; j++)
                     {
-                        if (GetSheetType(item.FrameGroup[i].SpriteInfo.SpriteId[j]) == 3)
-                        {
-                            if (Width == 2 && Height == 1)
-                            {
-                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
-                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
-                            }
-                            else
-                            {
-                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 2));
-                                w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
-                            }
-                        }
-                        else
-                        {
-                            w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
-                            w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
-                        }
+                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]] + 1));
+                        w.Write((uint)(SpritesOffset[(int)item.FrameGroup[i].SpriteInfo.SpriteId[j]]));
                     }
                 }
-                else if (sliceType == 4)
+                else if (sliceType == 3)
                 {
                     for (int j = 0; j < NumSprites/4; j++)
                     {
