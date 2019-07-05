@@ -202,7 +202,7 @@ namespace SpiderClientConverter
                     int CurrentId = 0;
                     for (int i = 0; i <= appearances.Object[appearances.Object.Count - 1].Id - 100; i++)
                     {
-                        if (i + 100 == appearances.Object[CurrentId].Id)
+                        if (i + 100 == appearances.Object[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
                         {
                             WriteAppearance1000(w, appearances.Object[CurrentId], 1);
                             CurrentId++;
@@ -216,7 +216,7 @@ namespace SpiderClientConverter
                     CurrentId = 0;
                     for (int i = 1; i <= appearances.Outfit[appearances.Outfit.Count - 1].Id; i++)
                     {
-                        if (appearances.Outfit[CurrentId] != null && i == appearances.Outfit[CurrentId].Id)
+                        if (appearances.Outfit[CurrentId] != null && i == appearances.Outfit[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
                         {
                             WriteAppearance1000(w, appearances.Outfit[CurrentId], 2);
                             CurrentId++;
@@ -230,7 +230,7 @@ namespace SpiderClientConverter
                     CurrentId = 0;
                     for (int i = 1; i <= appearances.Effect[appearances.Effect.Count - 1].Id; i++)
                     {
-                        if (appearances.Effect[CurrentId] != null && i == appearances.Effect[CurrentId].Id)
+                        if (appearances.Effect[CurrentId] != null && i == appearances.Effect[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
                         {
                             WriteAppearance1000(w, appearances.Effect[CurrentId], 3);
                             CurrentId++;
@@ -244,7 +244,7 @@ namespace SpiderClientConverter
                     CurrentId = 0;
                     for (int i = 1; i <= appearances.Missile[appearances.Missile.Count - 1].Id; i++)
                     {
-                        if (appearances.Missile[CurrentId] != null && i == appearances.Missile[CurrentId].Id)
+                        if (appearances.Missile[CurrentId] != null && i == appearances.Missile[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
                         {
                             WriteAppearance1000(w, appearances.Missile[CurrentId], 4);
                             CurrentId++;
