@@ -200,60 +200,55 @@ namespace SpiderClientConverter
                     w.Write(EffectCount);
                     w.Write(MissileCount);
                     int CurrentId = 0;
+                    byte[] blankItem = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
+                    byte[] blankOutfit = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
+                    byte[] blankEffect = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
+                    byte[] blankMissile = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
                     for (int i = 0; i <= appearances.Object[appearances.Object.Count - 1].Id - 100; i++)
                     {
-                        if (i + 100 == appearances.Object[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
+                        if (i + 100 == appearances.Object[CurrentId].Id)
                         {
-                            WriteAppearance1000(w, appearances.Object[CurrentId], 1);
+                            if (appearances.Object[CurrentId].FrameGroup.Count > 0)
+                                WriteAppearance1000(w, appearances.Object[CurrentId], 1);
+                            else
+                                w.Write(blankItem);
                             CurrentId++;
                         }
                         else
-                        {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
-                            w.Write(buffer);
-                        }
+                            w.Write(blankItem);
                     }
                     CurrentId = 0;
                     for (int i = 1; i <= appearances.Outfit[appearances.Outfit.Count - 1].Id; i++)
                     {
-                        if (appearances.Outfit[CurrentId] != null && i == appearances.Outfit[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
+                        if (appearances.Outfit[CurrentId] != null && i == appearances.Outfit[CurrentId].Id)
                         {
                             WriteAppearance1000(w, appearances.Outfit[CurrentId], 2);
                             CurrentId++;
                         }
                         else
-                        {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
-                            w.Write(buffer);
-                        }
+                            w.Write(blankOutfit);
                     }
                     CurrentId = 0;
                     for (int i = 1; i <= appearances.Effect[appearances.Effect.Count - 1].Id; i++)
                     {
-                        if (appearances.Effect[CurrentId] != null && i == appearances.Effect[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
+                        if (appearances.Effect[CurrentId] != null && i == appearances.Effect[CurrentId].Id)
                         {
                             WriteAppearance1000(w, appearances.Effect[CurrentId], 3);
                             CurrentId++;
                         }
                         else
-                        {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
-                            w.Write(buffer);
-                        }
+                            w.Write(blankEffect);
                     }
                     CurrentId = 0;
                     for (int i = 1; i <= appearances.Missile[appearances.Missile.Count - 1].Id; i++)
                     {
-                        if (appearances.Missile[CurrentId] != null && i == appearances.Missile[CurrentId].Id && appearances.Object[CurrentId].FrameGroup.Count() > 0)
+                        if (appearances.Missile[CurrentId] != null && i == appearances.Missile[CurrentId].Id)
                         {
                             WriteAppearance1000(w, appearances.Missile[CurrentId], 4);
                             CurrentId++;
                         }
                         else
-                        {
-                            byte[] buffer = { 0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
-                            w.Write(buffer);
-                        }
+                            w.Write(blankMissile);
                     }
                     datFile.Close();
                 }
