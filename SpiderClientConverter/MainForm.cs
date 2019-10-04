@@ -656,11 +656,11 @@ namespace SpiderClientConverter
             {
                 w.Write((byte)AppearanceFlag1000.Market);
 
-                ushort category = 0;
-                if ((ushort)item.Flags.Market.Category > 22)
+                ushort category = (ushort)item.Flags.Market.Category;
+                if (category > 22)
                     category = 9;
-
                 w.Write(category);
+
                 w.Write((ushort)item.Flags.Market.TradeAsObjectId);
                 w.Write((ushort)item.Flags.Market.ShowAsObjectId);
                 w.Write((ushort)item.Name.Length);
@@ -810,6 +810,7 @@ namespace SpiderClientConverter
         {
             SprSignature = (uint)sprHex.Value;
         }
+
     }
 }
 
