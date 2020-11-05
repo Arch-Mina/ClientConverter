@@ -48,6 +48,7 @@
             this.datHex = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.sigPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sprHex)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.datHex)).BeginInit();
@@ -87,7 +88,7 @@
             // 
             this.AssetsPath.Location = new System.Drawing.Point(92, 33);
             this.AssetsPath.Name = "AssetsPath";
-            this.AssetsPath.Size = new System.Drawing.Size(385, 20);
+            this.AssetsPath.Size = new System.Drawing.Size(294, 20);
             this.AssetsPath.TabIndex = 3;
             // 
             // OutputPath
@@ -241,11 +242,22 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "Dat Signature";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(392, 32);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(89, 21);
+            this.button1.TabIndex = 15;
+            this.button1.Text = "Auto Select Folder";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // SpiderClientConverter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(525, 463);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.sigPanel);
             this.Controls.Add(this.CustomSiganture);
             this.Controls.Add(this.ExSheets);
@@ -296,6 +308,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.NumericUpDown sprHex;
+        private System.Windows.Forms.Button button1;
     }
 }
 
