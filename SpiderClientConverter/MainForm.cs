@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using OpenTibia.Client.Sprites;
 using System.Linq;
 using System.Collections.Concurrent;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace SpiderClientConverter
 {
@@ -74,10 +75,11 @@ namespace SpiderClientConverter
 
         private void AssetsF_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog _assets = new FolderBrowserDialog();
-            if (_assets.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            CommonOpenFileDialog _assets = new CommonOpenFileDialog();
+            _assets.IsFolderPicker = true;
+            if (_assets.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                _assetsPath = _assets.SelectedPath;
+                _assetsPath = _assets.FileName;
                 if (_assetsPath.EndsWith("\\") == false)
                     _assetsPath = _assetsPath + "\\";
                 AssetsPath.Text = _assetsPath;
@@ -86,10 +88,11 @@ namespace SpiderClientConverter
 
         private void OutputF_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog _dumpTo = new FolderBrowserDialog();
-            if (_dumpTo.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            CommonOpenFileDialog _dumpTo = new CommonOpenFileDialog();
+            _dumpTo.IsFolderPicker = true;
+            if (_dumpTo.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                _dumpToPath = _dumpTo.SelectedPath;
+                _dumpToPath = _dumpTo.FileName;
                 if (_dumpToPath.EndsWith("\\") == false)
                     _dumpToPath = _dumpToPath + "\\";
                 OutputPath.Text = _dumpToPath;
@@ -811,6 +814,12 @@ namespace SpiderClientConverter
             SprSignature = (uint)sprHex.Value;
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string stringPath = "C:\\Users\\" + Environment.UserName + "\\AppData\\Local\\Tibia\\packages\\Tibia\\assets\\";
+            _assetsPath = stringPath;
+            AssetsPath.Text = stringPath;
+        }
     }
 }
 
