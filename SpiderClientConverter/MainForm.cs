@@ -10,6 +10,9 @@ using Newtonsoft.Json;
 using OpenTibia.Client.Sprites;
 using System.Linq;
 using System.Collections.Concurrent;
+using Tibia.Protobuf.Appearances;
+using Appearance = Tibia.Protobuf.Appearances.Appearance;
+using Tibia.Protobuf.Shared;
 
 namespace SpiderClientConverter
 {
@@ -514,10 +517,11 @@ namespace SpiderClientConverter
         public void WriteAppearance1000(BinaryWriter w, Appearance item, int type)
         {
             progress++;
-            if (item.Flags.Ground != null)
+            if (item.Flags.Bank != null)
             {
                 w.Write((byte)AppearanceFlag1000.Ground);
-                w.Write((ushort)item.Flags.Ground.GroundSpeed);
+                if (item.Flags.Bank.HasWaypoints)
+                    w.Write((ushort)item.Flags.Bank.Waypoints);
             }
 
             if (item.Flags.Clip)
@@ -668,8 +672,8 @@ namespace SpiderClientConverter
                     w.Write((char)item.Name[i]);
 
                 ushort Profession = 0;
-                for (int i = 0; i < item.Flags.Market.RestrictToProfession.Count; ++i)
-                    Profession += (ushort)item.Flags.Market.RestrictToProfession[i];
+                for (int i = 0; i < item.Flags.Market.RestrictToVocation.Count; ++i)
+                    Profession += (ushort)item.Flags.Market.RestrictToVocation[i];
                 w.Write(Profession);
                 w.Write((ushort)item.Flags.Market.MinimumLevel);
             }
