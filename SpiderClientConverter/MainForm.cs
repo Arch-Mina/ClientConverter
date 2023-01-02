@@ -78,6 +78,9 @@ namespace SpiderClientConverter
         private void AssetsF_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog _assets = new FolderBrowserDialog();
+            _assets.RootFolder = Environment.SpecialFolder.LocalApplicationData;
+            _assets.SelectedPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Tibia\\packages\\Tibia\\assets\\");
+
             if (_assets.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 _assetsPath = _assets.SelectedPath;
@@ -692,6 +695,105 @@ namespace SpiderClientConverter
 
             if (item.Flags.Topeffect)
                 w.Write((byte)AppearanceFlag1000.TopEffect);
+
+            if (ChangedToExpire.Checked)
+            {
+                if (item.Flags.Changedtoexpire != null)
+                {
+                    w.Write((byte)AppearanceFlag1000.ChangedToExpire);
+                    w.Write((ushort)item.Flags.Changedtoexpire.FormerObjectTypeid);
+                }
+            }
+
+            if (Corpse.Checked)
+            {
+                if (item.Flags.Corpse)
+                {
+                    w.Write((byte)AppearanceFlag1000.Corpse);
+                }
+            }
+
+            if (PlayerCorpse.Checked)
+            {
+                if (item.Flags.PlayerCorpse)
+                {
+                    w.Write((byte)AppearanceFlag1000.PlayerCorpse);
+                }
+            }
+
+            if (CyclopediaItem.Checked)
+            {
+                if (item.Flags.Cyclopediaitem != null)
+                {
+                    w.Write((byte)AppearanceFlag1000.CyclopediaItem);
+                    w.Write((ushort)item.Flags.Cyclopediaitem.CyclopediaType);
+                }
+            }
+
+            if (Ammo.Checked)
+            {
+                if (item.Flags.Ammo)
+                {
+                    w.Write((byte)AppearanceFlag1000.Ammo);
+                }
+            }
+
+            if (ShowOffSocket.Checked)
+            {
+                if (item.Flags.ShowOffSocket)
+                {
+                    w.Write((byte)AppearanceFlag1000.ShowOffSocket);
+                }
+            }
+
+            if (Reportable.Checked)
+            {
+                if (item.Flags.Reportable)
+                {
+                    w.Write((byte)AppearanceFlag1000.Reportable);
+                }
+            }
+
+            if (UpgradeClassification.Checked)
+            {
+                if (item.Flags.Upgradeclassification != null)
+                {
+                    w.Write((byte)AppearanceFlag1000.UpgradeClassification);
+                    w.Write((ushort)item.Flags.Upgradeclassification.UpgradeClassification);
+                }
+            }
+
+            if (Wearout.Checked)
+            {
+                if (item.Flags.Wearout)
+                {
+                    w.Write((byte)AppearanceFlag1000.Wearout);
+                }
+            }
+
+            if (ClockExpire.Checked)
+            {
+                if (item.Flags.Clockexpire)
+                {
+                    w.Write((byte)AppearanceFlag1000.ClockExpire);
+                }
+            }
+
+            if (Expire.Checked)
+            {
+                if (item.Flags.Expire)
+                {
+                    w.Write((byte)AppearanceFlag1000.Expire);
+                }
+            }
+
+            if (ExpireStop.Checked)
+            {
+                if (item.Flags.Expirestop)
+                {
+                    w.Write((byte)AppearanceFlag1000.ExpireStop);
+                }
+            }
 
             w.Write((byte)0xFF);
 

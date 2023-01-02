@@ -42,6 +42,19 @@
         Wrappable = 36,
         UnWrappable = 37,
         TopEffect = 38,
+        NpcSaleData = 39,
+        ChangedToExpire = 40,
+        Corpse = 41,
+        PlayerCorpse = 42,
+        CyclopediaItem = 43,
+        Ammo = 44,
+        ShowOffSocket = 45,
+        Reportable = 46,
+        UpgradeClassification = 47,
+        Wearout = 48,
+        ClockExpire = 49,
+        Expire = 50,
+        ExpireStop = 51,
         Default = 255
 
     }
